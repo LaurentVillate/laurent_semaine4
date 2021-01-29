@@ -1,5 +1,3 @@
-
-
 <!Doctype html>
 <html lang="fr">      
 <head>
@@ -9,12 +7,12 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>Jarditou</title>
     <!-- PHP Connexion à la base de données -->
-    <?php   
+    <?php  
      require "connexion_bdd.php"; // Inclusion de notre bibliothèque de fonctions
 
   $db = connexionBase (); // Appel de la fonction de connexion//
      // Récupération de l'id en get par l'url//
-     $pro_id = $_GET["pro_id"];
+     $pro_id = $_GET["id"];
      $pro_id = (int)$pro_id;
      $requete = "SELECT * FROM produits WHERE pro_id=" .$pro_id;
 
@@ -49,13 +47,13 @@
         </div>
         </nav>
 <!--formulaire -->
-        <form name="formliste" action="liste.php" method="post" id="formulaire">
+        <form name="formliste" action="update_script.php" method="post" id="formulaire">
             <fieldset>
-<!--Récupération de l'id-->
+<!--Récupération de l'id
                 <div class="form-group">
                     <label for="ID">ID</label>
-                    <input type="text" class="form-control" name="ID" id="ID" value="<?php echo $pro_id; ?>" >  
-                </div>
+                    <input type="number" class="form-control" name="ID" id="ID" value="<?php echo $pro_id; ?>" >  
+                </div>-->
 <!--Récupération de la référence-->
                 <div class="form-group">
                     <label for="ref">Référence</label>
@@ -63,10 +61,37 @@
                     <span style ="color: red" id="noPrenom"></span>      
                 </div>
 <!--Récupération de la catégorie-->
-                <div class="form-group">
-                    <label for="cat">Catégorie</label>
-                    <input type="text" class="form-control" name="cat" id="cat" value="<?php echo $produit->pro_cat_id; ?>" >  
-                </div>
+                <!-- catégorie liste déroulante-->
+                <?php
+                $requete = "SELECT DISTINCT cat_id, cat_nom FROM categories";//Sélection des différentes catégories//
+                $result = $db->query($requete);
+
+                if (!$result) 
+                {
+                $tableauErreurs = $db->errorInfo();
+                echo $tableauErreur[2]; 
+                die("Erreur dans la requête");
+                }
+
+                if ($result->rowCount() == 0) 
+                {
+                // Pas d'enregistrement
+                die("La table est vide");
+                }
+                // Création d'un menu déroulant et boucle pour insérer les option//
+                echo "<form name='deroulant' action='' method='post'>";
+                echo "<div class='form-group'>";
+                echo "<label for='sujet'>Catégorie</label>";
+                echo "<select class='form-control' name='categorie[]'>";
+                while ($row = $result->fetch(PDO::FETCH_OBJ))
+                {
+                echo "<option value= \"$row->cat_id\">$row->cat_nom</option>";
+                }
+                echo "</select><br>";
+                echo "</form";
+                echo "</div>";
+// Fin de la liste déroulante catégorie//
+?>
 <!--Récupération du libellé; lien vers détail-->
                 <div class="form-group">
                     <label for="libel">libellé</label>
@@ -91,6 +116,11 @@
                 <div class="form-group">
                     <label for="coul">Couleur</label>
                     <input type="text" class="form-control" name ="coul" id="coul" value="<?php echo $produit->pro_couleur; ?>">
+<!-- Date du jour -->
+<div class="form-group">
+                    <label for="photo">date</label>
+                    <input type="text" class="form-control" name ="date_modif" id="date_modif" placeholder="" value="<?php echo date("Y/m/d")?>">
+                </div>
 <!--checked du bouton oui ou non pour produit bloqué-->  
                 </div>
                 <div class="form-group">
@@ -104,16 +134,8 @@
                     <label class="form-check-label" for="inlineRadio1">Non</label>
                     </div>
                 </div>
-                <div class="form-group">
-                    Date d'ajout : <?php echo $produit->pro_d_ajout; ?>
-                </div>  
-                <div class="form-group">
-                    Date de modification : <?php echo $produit->pro_d_modif; ?>
-                </div>
 <!-- liens vers modification ou retour à la liste des produits-->
-                <a href="update_form.php?id=<?php echo $pro_id; ?>" class="btn btn-outline-primary">Modifier</a><br><br>
-                <a href= "delete_form.php?id=<?php echo $pro_id; ?>" class="btn btn-outline-primary">Supprimer</a><br><br>
-                <input type="submit" class="btn btn-outline-primary" value="Retour à la liste">
+                <input type="submit" class="btn btn-outline-primary" value="Enregistrer les modifications" id="">
             </fieldset>             
         </form>
         <br><br><br>

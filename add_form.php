@@ -7,20 +7,6 @@
     <!--intégration Boostrap-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>Jarditou</title>
-    <!-- PHP Connexion à la base de données -->
-    <?php   
-     require "connexion_bdd.php"; // Inclusion de notre bibliothèque de fonctions
-
-     $db = connexionBase (); // Appel de la fonction de connexion
-     $pro_id = $Get["pro_id"];
-     $pro_id = (int)$pro_id;
-   $requete = "SELECT * FROM produits WHERE pro_id=" .$pro_id;
-
-    $result = $db->query($requete);
-
-    // Renvoi de l'enregistrement sous forme d'un objet
-    $produit = $result->fetch(PDO::FETCH_OBJ);
-   ?>
 </head>
 <body>
 <!--Container boostrap-->
@@ -42,29 +28,51 @@
         </div>
         </nav>
 <!--formulaire -->
-        <form name="ajout" action="add_script.php" method="post">
+        <form name="ajout" action="add_script.php" method="post" enctype="multipart/form-data">
             <fieldset>
-<!--L'Id s'incrémente dans la base....
-                <div class="form-group">
-                    <label for="ID">ID</label>
-                    <input type="number" class="form-control" name="ID" id="ID" placeholder="Saisissez l'ID" value="<?php echo $pro_id; ?>" >  
-                </div>
--->
+            <br>
+<!-- catégorie liste déroulante-->
+                <?php
+                require "connexion_bdd.php"; // Bibliothèque de fonctions
+                $db = connexionBase(); // Fonction de connexion//
+                $requete = "SELECT DISTINCT cat_id, cat_nom FROM categories";//Sélection des différentes catégories//
+                $result = $db->query($requete);
+
+                if (!$result) 
+                {
+                $tableauErreurs = $db->errorInfo();
+                echo $tableauErreur[2]; 
+                die("Erreur dans la requête");
+                }
+
+                if ($result->rowCount() == 0) 
+                {
+                // Pas d'enregistrement
+                die("La table est vide");
+                }
+                // Création d'un menu déroulant et boucle pour insérer les option//
+                echo "<form name='deroulant' action='' method='post'>";
+                echo "<div class='form-group'>";
+                echo "<label for='sujet'>Catégorie</label>";
+                echo "<select class='form-control' name='categorie[]'>";
+                while ($row = $result->fetch(PDO::FETCH_OBJ))
+                {
+                echo "<option value= \"$row->cat_id\">$row->cat_nom</option>";
+                }
+                echo "</select><br>";
+                echo "</form";
+                echo "</div>";
+// Fin de la liste déroulante catégorie//
+?>
 <!--Ajout d'une référence-->
                 <div class="form-group">
-                    <label for="ref">Catégorie</label>
-                    <input type="number" class="form-control" name ="ref" id="ref" placeholder="Saisissez la catégorie" value="<?php echo $produit->pro_ref; ?>">
-                    <span style ="color: red" id="noPrenom"></span>      
-                </div>
-<!--Ajout d'une catégorie-->
-                <div class="form-group">
-                    <label for="cat">Référence</label>
-                    <input type="text" class="form-control" name="cat" id="cat" placeholder="Saisissez la référence" value="<?php echo $produit->pro_cat_id; ?>" >  
+                    <label for="ref">Référence</label>
+                    <input type="text" class="form-control" name ="ref" id="ref" placeholder="Saisissez la référence" value="">    
                 </div>
 <!--Ajout d'un libellé-->
                 <div class="form-group">
                     <label for="libel">Libellé</label>
-                    <input type="text" class="form-control" name ="libel" id="libel" placeholder="Saisissez le libellé" value="<?php echo $produit->pro_libelle; ?>">    
+                    <input type="text" class="form-control" name ="libel" id="libel" placeholder="Saisissez le libellé" value="">    
                 </div>
 <!--Ajout d'une description-->
                 <div class="form-group">
@@ -74,32 +82,27 @@
                 </div>
                 <div class="form-group">
                     <label for="prix">Prix</label>
-                    <input type="text" class="form-control" name ="prix" id="prix" placeholder="Saisissez le prix" value="<?php echo $produit->pro_prix; ?>">
+                    <input type="text" class="form-control" name ="prix" id="prix" placeholder="Saisissez le prix" value="">
 <!--Ajout d'un stock-->    
                 </div>
                 <div class="form-group">
                     <label for="stock">Stock</label>
-                    <input type="number" class="form-control" name="stock" id="stock" placeholder="Saisissez le stock" value="<?php echo $produit->pro_stock; ?>" >  
+                    <input type="number" class="form-control" name="stock" id="stock" placeholder="Saisissez le stock" value="" >  
 <!--Ajout d'une couleur-->
                 </div>
                 <div class="form-group">
                     <label for="coul">Couleur</label>
-                    <input type="text" class="form-control" name ="coul" id="coul" placeholder="Saisissez la couleur" value="<?php echo $produit->pro_couleur; ?>">
+                    <input type="text" class="form-control" name ="coul" id="coul" placeholder="Saisissez la couleur" value="">
                 </div>
 <!-- Ajout d'une photo-->
                 <div class="form-group">
-                    <label for="photo">Photo</label>
-                    <input type="text" class="form-control" name ="photo" id="photo" placeholder="jpg" value="<?php echo "jpg"?>">
+                    <label for="photo">Photo</label><br>
+                    <input type="file" name="photo">
                 </div>
-<!-- Ajout d'une date d'ajout-->
+<!-- Date du jour -->
                 <div class="form-group">
-                    <label for="dateajout">Date d'ajout</label>
-                    <input type="text" class="form-control" name ="dateajout" id="dateajout" placeholder="" value="<?php echo date("d/m/Y")?>">
-                </div>
-<!-- Ajout d'une date de modif (NULL, à ne pas renseigné)-->
-                <div class="form-group">
-                    <label for="dateajout">Date d'ajout</label>
-                    <input type="text" class="form-control" name ="dateajout" id="dateajout" placeholder="Ne rien saisisir dans ce champ" value="">
+                    <label for="date">date</label>
+                    <input type="text" class="form-control" name ="date" id="date" placeholder="" value="<?php echo date("Y/m/d")?>">
                 </div>
 <!--Ajout d'un produit bloqué-->  
                 <div class="form-group">

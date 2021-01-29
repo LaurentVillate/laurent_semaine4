@@ -16,7 +16,8 @@ function connexionBase()
     {
         echo 'Erreur : ' . $e->getMessage() . '<br>';
         echo 'N° : ' . $e->getCode() . '<br>';
-        die('Connexion au serveur impossible.');
+        die('Connexion serveur impossible.');
     } 
 }
+
 ?>
